@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
@@ -12,7 +11,6 @@ using static InsertDataToSQL.Program;
 
 namespace InsertDataToSQL
 {
-
     class Program
     {
         //****product****
@@ -51,15 +49,12 @@ namespace InsertDataToSQL
 
         static void Main()
         {
-            string excelFilePath = "D:\\PishroTech\\InsertDataToSQL\\InsertDataToSQL\\data\\kala.xlsx";
-            string excelFilePathSecound = "D:\\PishroTech\\InsertDataToSQL\\InsertDataToSQL\\data\\i_in.xlsx";
-            string connectionString = "Server=localhost;Database=sadra;User ID=root;Password=;";
+            var excelFilePath = "G:\\Projects\\C#\\InsertDataToSQL\\InsertDataToSQL\\data\\kala.xlsx";
+            var excelFilePathSecound = "G:\\Projects\\C#\\InsertDataToSQL\\InsertDataToSQL\\data\\i_in.xlsx";
+            var connectionString = "Server=localhost;Database=sadratest;User ID=root;Password=root;";
 
-            DataTable excelDataKala = ReadExcelData(excelFilePath);
-            DataTable excelDataOutProduct = ReadExcelData(excelFilePathSecound);
-
-
-          
+            var excelDataKala = ReadExcelData(excelFilePath);
+            var excelDataOutProduct = ReadExcelData(excelFilePathSecound);
 
 
             //product
@@ -116,19 +111,20 @@ namespace InsertDataToSQL
             units = new HashSet<string>(products.Select(x => x.vahed).ToList());
 
 
-            // اضافه شدن مرحله تولید
+            // // اضافه شدن مرحله تولید
             var phaseId = InsertPhasesIntoMySql(connectionString);
-
-            // اضافه شدن گروه مرحله تولید
+            //
+            // // اضافه شدن گروه مرحله تولید
             var profileId = InsertProfileIntoMySql(connectionString);
             InsertBuildPhaseProfileIntoMySql(new List<int>() { phaseId, profileId }, connectionString);
-
-            // اضافه شدن پارامتر / مقادیر مرحله تولید
+            //
+            // // اضافه شدن پارامتر / مقادیر مرحله تولید
             InsertBuildPhaseParametersIntoMySql(phaseId, connectionString);
-
-            // اضافه شدن واحد
+            //
+            // // اضافه شدن واحد
             InsertUnitIntoMySql(units, connectionString);
             InsertProductIntoMySql(products, profileId, connectionString);
+            InsertOutProductIntoMySql(outProducts, connectionString);
         }
 
 
@@ -165,14 +161,14 @@ namespace InsertDataToSQL
         //bulid-phases مرحله تولید 
         static int InsertPhasesIntoMySql(string connectionString)
         {
-
             var phaseId = 0;
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                var query = $"INSERT INTO build_phases (`title`, `type`, `order`, `in_warehouse`) VALUES(@Title, @Type, @Order, @In_Warehouse)";
+                var query =
+                    $"INSERT INTO build_phases (`title`, `type`, `order`, `in_warehouse`) VALUES(@Title, @Type, @Order, @In_Warehouse)";
 
                 using MySqlCommand command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue($"@Title", "تولید");
@@ -191,13 +187,12 @@ namespace InsertDataToSQL
                         reader.Read();
                         phaseId = reader.GetInt32("id");
                         reader.Close();
-
                     }
                 }
 
                 connection.Close();
-
             }
+
             Console.WriteLine("Adding Phases was successful!");
             return phaseId;
         }
@@ -205,7 +200,6 @@ namespace InsertDataToSQL
         //phase_profiles پروفایل تولید 
         static int InsertProfileIntoMySql(string connectionString)
         {
-
             var profileId = 0;
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -229,13 +223,12 @@ namespace InsertDataToSQL
                         reader.Read();
                         profileId = reader.GetInt32("id");
                         reader.Close();
-
                     }
                 }
 
                 connection.Close();
-
             }
+
             Console.WriteLine("Adding Profile was successful!");
             return profileId;
         }
@@ -243,21 +236,20 @@ namespace InsertDataToSQL
         //build_phase_phase_profile ارتباط مرحله و پروفایل
         static void InsertBuildPhaseProfileIntoMySql(List<int> ids, string connectionString)
         {
-
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
 
-                var query = $"INSERT INTO build_phase_phase_profile (`build_phase_id`, `phase_profile_id`) VALUES(@Build_Phase_Id, @Phase_Profile_Id)";
+                var query =
+                    $"INSERT INTO build_phase_phase_profile (`build_phase_id`, `phase_profile_id`) VALUES(@Build_Phase_Id, @Phase_Profile_Id)";
 
                 using MySqlCommand command = new MySqlCommand(query, connection);
                 command.Parameters.AddWithValue($"@Build_Phase_Id", ids[0]);
                 command.Parameters.AddWithValue($"@Phase_Profile_Id", ids[1]);
                 command.ExecuteNonQuery();
-
             }
-            Console.WriteLine("Adding BuildPhaseProfile was successful!");
 
+            Console.WriteLine("Adding BuildPhaseProfile was successful!");
         }
 
 
@@ -266,13 +258,13 @@ namespace InsertDataToSQL
         {
             var parameters = new List<Tuple<string, HashSet<string>>>()
             {
-                new("دنیر",disnValue),
+                new("دنیر", disnValue),
                 new("فیلامنت", t_sanValue),
-                new("رنگ",colorValue),
-                new("همبافت",hambaftValue),
-                new("تعداد دوک",n_dokValue),
-                new("کیفیت",kindValue),
-                new("دوک",k_dokValue),
+                new("رنگ", colorValue),
+                new("همبافت", hambaftValue),
+                new("تعداد دوک", n_dokValue),
+                new("کیفیت", kindValue),
+                new("دوک", k_dokValue),
             };
 
 
@@ -280,7 +272,8 @@ namespace InsertDataToSQL
             {
                 connection.Open();
 
-                var query = $"INSERT INTO build_phase_parameters (`title`, `type`,`build_phase_id`) VALUES(@Title, @Type, @Build_Phase_Id)";
+                var query =
+                    $"INSERT INTO build_phase_parameters (`title`, `type`,`build_phase_id`) VALUES(@Title, @Type, @Build_Phase_Id)";
 
                 foreach (var item in parameters)
                 {
@@ -301,29 +294,28 @@ namespace InsertDataToSQL
                             var parameterId = reader.GetInt32("id");
                             reader.Close();
 
-                            var insertValueQuery = $"INSERT INTO build_phase_parameter_options (`title`, `build_phase_parameter_id`) VALUES(@Title, @Build_Phase_Parameter_Id)";
+                            var insertValueQuery =
+                                $"INSERT INTO build_phase_parameter_options (`title`, `build_phase_parameter_id`) VALUES(@Title, @Build_Phase_Parameter_Id)";
                             foreach (var value in item.Item2)
                             {
-                                using (MySqlCommand insertProductCommand = new MySqlCommand(insertValueQuery, connection))
+                                using (MySqlCommand insertProductCommand =
+                                       new MySqlCommand(insertValueQuery, connection))
                                 {
                                     insertProductCommand.Parameters.AddWithValue("@Title", value);
-                                    insertProductCommand.Parameters.AddWithValue("@Build_Phase_Parameter_Id", parameterId);
+                                    insertProductCommand.Parameters.AddWithValue("@Build_Phase_Parameter_Id",
+                                        parameterId);
                                     insertProductCommand.ExecuteNonQuery();
                                 }
                             }
-                          
-
                         }
                     }
                 }
+
                 connection.Close();
             }
+
             Console.WriteLine("Adding BuildPhaseParameters was successful!");
-
         }
-
-
-
 
         //units واحد
         static void InsertUnitIntoMySql(HashSet<string> data, string connectionString)
@@ -334,7 +326,7 @@ namespace InsertDataToSQL
 
                 foreach (var row in data)
                 {
-                    var query = $"INSERT INTO units (`title`, `type`) VALUES(@Title, @Type)";
+                    var query = $"INSERT INTO units (`title`, `type`, `rate`) VALUES(@Title, @Type, 1)";
 
                     using MySqlCommand command = new MySqlCommand(query, connection);
                     command.Parameters.AddWithValue($"@Title", row);
@@ -342,9 +334,39 @@ namespace InsertDataToSQL
                     command.ExecuteNonQuery();
                 }
             }
+
             Console.WriteLine("Adding Unit was successful!");
         }
 
+
+        static List<int> getBuildPhaseParameterOptions(string title1, string title2, string title3,
+            string connectionString)
+        {
+            var buildPhaseParameterOptions = new List<int>();
+            using var connection = new MySqlConnection(connectionString);
+            connection.Open();
+
+            var getParameter = "SELECT * FROM build_phase_parameter_options WHERE title in(@Title1, @Title2, @Title3)";
+            using (var getBuildPhaseParameterOptions = new MySqlCommand(getParameter, connection))
+            {
+                getBuildPhaseParameterOptions.Parameters.AddWithValue("@Title1", title1);
+                getBuildPhaseParameterOptions.Parameters.AddWithValue("@Title2", title2);
+                getBuildPhaseParameterOptions.Parameters.AddWithValue("@Title3", title3);
+                using (var buildPhaseParameterOptionsReader =
+                       getBuildPhaseParameterOptions.ExecuteReader())
+                {
+                    while (buildPhaseParameterOptionsReader.Read())
+                    {
+                        buildPhaseParameterOptions.Add(buildPhaseParameterOptionsReader.GetInt32("id"));
+                    }
+
+                    buildPhaseParameterOptionsReader.Close();
+                }
+            }
+
+
+            return buildPhaseParameterOptions;
+        }
 
         //products کالا
         static void InsertProductIntoMySql(List<product> data, int profileId, string connectionString)
@@ -353,8 +375,10 @@ namespace InsertDataToSQL
             {
                 var getUnitQuery = "SELECT * FROM units WHERE title = @Title";
                 var getProduct = "SELECT * FROM products WHERE code = @Code";
-                var getParameter = "SELECT * FROM build_phase_parameter_options WHERE title in(@Title1, @Title2, @Title3, @Title4)";
-                var insertProductQuery = "INSERT INTO products (title, code, unit_id, phase_profile_id) VALUES (@Title, @Code, @Unit_Id, @Phase_Profile_Id)";
+                var getParameter =
+                    "SELECT * FROM build_phase_parameter_options WHERE title in(@Title1, @Title2, @Title3, @Title4)";
+                var insertProductQuery =
+                    "INSERT INTO products (title, code, unit_id, phase_profile_id) VALUES (@Title, @Code, @Unit_Id, @Phase_Profile_Id)";
                 var attachProductWithBuildPhaseParameterOptions =
                     "INSERT INTO build_phase_parameter_option_product (`bppo_id`, `product_id`) VALUES (@OptionId, @ProductId)";
 
@@ -372,7 +396,8 @@ namespace InsertDataToSQL
                             var unitId = reader.GetInt32("id");
                             reader.Close();
                             var buildPhaseParameterOptions = new List<int>();
-                            using (MySqlCommand getBuildPhaseParameterOptions = new MySqlCommand(getParameter, connection))
+                            using (MySqlCommand getBuildPhaseParameterOptions =
+                                   new MySqlCommand(getParameter, connection))
                             {
                                 getBuildPhaseParameterOptions.Parameters.AddWithValue("@Title1", row.color);
                                 getBuildPhaseParameterOptions.Parameters.AddWithValue("@Title2", row.kind);
@@ -385,16 +410,17 @@ namespace InsertDataToSQL
                                     {
                                         buildPhaseParameterOptions.Add(buildPhaseParameterOptionsReader.GetInt32("id"));
                                     }
-                                    
+
                                     buildPhaseParameterOptionsReader.Close();
                                 }
-
                             }
+
                             using (MySqlCommand insertProductCommand = new MySqlCommand(insertProductQuery, connection))
                             {
                                 // Use distinct parameter names for each value
                                 insertProductCommand.Parameters.AddWithValue("@Title", row.name_kala);
-                                insertProductCommand.Parameters.AddWithValue("@Code", row.code_kala); // Replace with the actual code column
+                                insertProductCommand.Parameters.AddWithValue("@Code",
+                                    row.code_kala); // Replace with the actual code column
                                 insertProductCommand.Parameters.AddWithValue("@Unit_Id", unitId);
                                 insertProductCommand.Parameters.AddWithValue("@Phase_Profile_Id", profileId);
 
@@ -420,26 +446,20 @@ namespace InsertDataToSQL
                                 using (MySqlCommand attachProductWithBuildPhaseParameterOptionsCommand =
                                        new MySqlCommand(attachProductWithBuildPhaseParameterOptions, connection))
                                 {
-
                                     attachProductWithBuildPhaseParameterOptionsCommand.Parameters.AddWithValue(
                                         "@OptionId", itemId);
                                     attachProductWithBuildPhaseParameterOptionsCommand.Parameters.AddWithValue(
                                         "@ProductId", productId);
                                     attachProductWithBuildPhaseParameterOptionsCommand.ExecuteNonQuery();
-
-
                                 }
                             }
                         }
-
                     }
-
                 }
             }
+
             Console.WriteLine("Adding Product was successful!");
-
         }
-
 
 
         //out_products رسید تولید
@@ -447,47 +467,110 @@ namespace InsertDataToSQL
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                var getProductQuery = "SELECT * FROM products WHERE code = @Code";
-                var insertOutProductQuery = "INSERT INTO out_products (product_id, barcode, value, value_nakhales) VALUES (@Product_Id, @Barcode, @Value, @Value_Nakhales)";
+                var insertOutProductQuery =
+                    "INSERT INTO out_products (product_id, barcode, value, value_nakhales, machine_id, build_phase_id) VALUES (@Product_Id, @Barcode, @Value, @Value_Nakhales, 1,1)";
 
                 connection.Open();
 
                 foreach (var row in data)
                 {
-                    using (MySqlCommand getUnitCommand = new MySqlCommand(getProductQuery, connection))
+                    var productId = getProductId(row.code_kala, connectionString);
+                    if (productId <= 0)
+                        continue;
+
+                    using (var insertProductCommand = new MySqlCommand(insertOutProductQuery, connection))
                     {
-                        getUnitCommand.Parameters.AddWithValue("@Code", row.code_kala);
+                        // Use distinct parameter names for each value
+                        insertProductCommand.Parameters.AddWithValue("@Product_Id", productId);
+                        insertProductCommand.Parameters.AddWithValue("@Barcode", row.no_c);
+                        insertProductCommand.Parameters.AddWithValue("@Value", row.wnet);
+                        insertProductCommand.Parameters.AddWithValue("@Value_Nakhales",
+                            row.nwnet); // Replace with the actual code column
 
-                        using (MySqlDataReader reader = getUnitCommand.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                var productId = reader.GetInt32("id");
-                                reader.Close();
-                                using MySqlCommand insertProductCommand = new MySqlCommand(insertOutProductQuery, connection);
-                                // Use distinct parameter names for each value
-                                insertProductCommand.Parameters.AddWithValue("@Product_Id", productId);
-                                insertProductCommand.Parameters.AddWithValue("@Barcode", row.no_c);
-                                insertProductCommand.Parameters.AddWithValue("@Value", row.wnet);
-                                insertProductCommand.Parameters.AddWithValue("@Value_Nakhales", row.nwnet); // Replace with the actual code column
-
-                                insertProductCommand.ExecuteNonQuery();
-                            }
-
-                        }
-
+                        insertProductCommand.ExecuteNonQuery();
                     }
 
+                    Console.WriteLine("barcode added => " + row.no_c);
+
+                    var outProductId = getOutProductId(row.no_c, connectionString);
+                    var productOptionIds = getProductBuildPhaseParameterOptions(productId, connectionString);
+                    var outProductOptionIds = getBuildPhaseParameterOptions(row.n_dok, row.k_dok, row.hambaft, connectionString);
+                    var optionIds = new HashSet<int>();
+
+                    foreach (var optionId in productOptionIds)
+                    {
+                        optionIds.Add(optionId);
+                    }
+                    foreach (var optionId in outProductOptionIds)
+                    {
+                        optionIds.Add(optionId);
+                    }
+                    
+                    var insertToBuildPhaseParameterOptionProduct =
+                        "INSERT INTO build_phase_parameter_option_option_out_products (build_phase_parameter_option_id, out_product_id) VALUES (@OptionId, @OutProductId)";
+                    foreach (var optionId in optionIds)
+                    {
+                        using var insertToBuildPhaseParameterOptionProductCommand =
+                            new MySqlCommand(insertToBuildPhaseParameterOptionProduct, connection);
+                        insertToBuildPhaseParameterOptionProductCommand.Parameters.AddWithValue("@OptionId", optionId);
+                        insertToBuildPhaseParameterOptionProductCommand.Parameters.AddWithValue("@OutProductId",
+                            outProductId);
+                        insertToBuildPhaseParameterOptionProductCommand.ExecuteNonQuery();
+                    }
                 }
             }
-            Console.WriteLine("Adding OutProduct was successful!");
 
+            Console.WriteLine("Adding OutProduct was successful!");
         }
 
+        static int getProductId(string code, string connectionString)
+        {
+            var getProduct = "SELECT * FROM products WHERE code = @Code";
+            var productId = 0;
+            using var connection = new MySqlConnection(connectionString);
+            connection.Open();
+            using var getProductCommand = new MySqlCommand(getProduct, connection);
+            getProductCommand.Parameters.AddWithValue("@Code", code);
+            using var productReader = getProductCommand.ExecuteReader();
+            while (productReader.Read())
+            {
+                productId = productReader.GetInt32("id");
+            }
 
+            productReader.Close();
+            return productId;
+        }
 
+        static int getOutProductId(string barcode, string connectionString)
+        {
+            var getOutProduct = "SELECT * FROM out_products WHERE barcode = @Barcode";
+            var id = 0;
+            using var connection = new MySqlConnection(connectionString);
+            connection.Open();
+            using var getOutProductCommand = new MySqlCommand(getOutProduct, connection);
+            getOutProductCommand.Parameters.AddWithValue("@Barcode", barcode);
+            using var outProductReader = getOutProductCommand.ExecuteReader();
+            outProductReader.Read();
+            id = outProductReader.GetInt32("id");
+            outProductReader.Close();
+            return id;
+        }
 
+        static List<int> getProductBuildPhaseParameterOptions(int product_id, string connectionString)
+        {
+            var query = $"SELECT * FROM build_phase_parameter_option_product where product_id = {product_id}";
+            var optionIds = new List<int>();
+            using var connection = new MySqlConnection(connectionString);
+            connection.Open();
+            using var getOptionCommand = new MySqlCommand(query, connection);
+            using var optionReader = getOptionCommand.ExecuteReader();
+            while (optionReader.Read())
+            {
+                optionIds.Add(optionReader.GetInt32("bppo_id"));
+            }
+
+            optionReader.Close();
+            return optionIds;
+        }
     }
-
 }
-
