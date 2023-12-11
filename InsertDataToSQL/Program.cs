@@ -468,13 +468,14 @@ namespace InsertDataToSQL
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 var insertOutProductQuery =
-                    "INSERT INTO out_products (product_id, barcode, value, value_nakhales, machine_id, build_phase_id) VALUES (@Product_Id, @Barcode, @Value, @Value_Nakhales, 1,1)";
+                    "INSERT INTO out_products (product_id, barcode, value, value_nakhales, machine_id, build_phase_id, remain, build_no) VALUES (@Product_Id, @Barcode, @Value, @Value_Nakhales, 1,1, @Remain, @BuildNo)";
 
                 connection.Open();
-
+                var count = 153672;
                 foreach (var row in data)
                 {
                     var productId = getProductId(row.code_kala, connectionString);
+                    count++;
                     if (productId <= 0)
                         continue;
 
@@ -484,6 +485,8 @@ namespace InsertDataToSQL
                         insertProductCommand.Parameters.AddWithValue("@Product_Id", productId);
                         insertProductCommand.Parameters.AddWithValue("@Barcode", row.no_c);
                         insertProductCommand.Parameters.AddWithValue("@Value", row.wnet);
+                        insertProductCommand.Parameters.AddWithValue("@Remain", row.wnet);
+                        insertProductCommand.Parameters.AddWithValue("@BuildNo", count);
                         insertProductCommand.Parameters.AddWithValue("@Value_Nakhales",
                             row.nwnet); // Replace with the actual code column
 
